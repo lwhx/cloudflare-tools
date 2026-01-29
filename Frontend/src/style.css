@@ -1,0 +1,5 @@
+@import "@tabler/core/dist/css/tabler.min.css";
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+}
