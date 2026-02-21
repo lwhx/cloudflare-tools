@@ -27,6 +27,8 @@ func main() {
 
 	r.POST("/api/login", handler.Login)
 
+	r.GET("/api/certs/download/:filename", handler.DownloadCert)
+
 	api := r.Group("/api")
 	api.Use(handler.AuthMiddleware())
 	{
@@ -41,11 +43,14 @@ func main() {
 		api.POST("/dns/batch-delete", handler.BatchDeleteDNS)
 		api.POST("/dns/proxy-toggle", handler.BatchProxyToggle)
 		api.POST("/ssl/batch-settings", handler.BatchSSLSettings)
+		api.POST("/certs/batch-apply", handler.BatchApplyCert)
+		api.GET("/certs/list", handler.ListCerts)
 		api.POST("/rules/batch-copy", handler.BatchCopyRules)
 		api.POST("/rules/batch-delete", handler.BatchDeleteRules)
 		api.POST("/cache/batch-settings", handler.BatchCacheSettings)
 		api.POST("/optimization/batch-settings", handler.BatchOptimization)
 		api.POST("/bulk-settings/batch-apply", handler.BatchBulkSettings)
+		api.POST("/email/batch-routing", handler.BatchEmailRouting)
 	}
 
 	dist, err := fs.Sub(content, "dist")

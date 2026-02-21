@@ -1,6 +1,6 @@
 module cloudflare-tools/server
 
-go 1.25.5
+go 1.25
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect

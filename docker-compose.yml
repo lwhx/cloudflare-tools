@@ -1,0 +1,28 @@
+services:
+  cloudflare-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudflare-tools
+    restart: unless-stopped
+    ports:
+      - "28080:8080"
+    volumes:
+      - ./data/config.yaml:/data/config.yaml
+      - ./data/accounts.json:/data/accounts.json
+      - ./data/certs:/data/certs
+    environment:
+      - TZ=Asia/Shanghai
+      - DATA_DIR=/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - cloudflare-net
+
+networks:
+  cloudflare-net:
+    driver: bridge

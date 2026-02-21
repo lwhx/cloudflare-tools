@@ -7,17 +7,19 @@ import { ProxyToggleModule } from "./modules/proxy_toggle.js";
 import { DelZoneModule } from "./modules/del_zone.js";
 import { ExportZonesModule } from "./modules/export_zones.js";
 import { SSLSettingsModule } from "./modules/ssl_settings.js";
+import { ApplyCertModule } from "./modules/apply_cert.js";
 import { CopyRulesModule } from "./modules/copy_rules.js";
 import { DelRulesModule } from "./modules/del_rules.js";
 import { CacheSettingsModule } from "./modules/cache_settings.js";
 import { OptimizationModule } from "./modules/optimization.js";
 import { BulkSettingsModule } from "./modules/bulk_settings.js";
+import { EmailRoutingModule } from "./modules/email_routing.js";
 
 window.AccountsModule = AccountsModule;
 
 const app = document.getElementById('app');
 
-window.handleAuthError = function(response) {
+window.handleAuthError = function (response) {
   if (response.status === 401) {
     localStorage.removeItem('token');
     state.token = null;
@@ -62,6 +64,7 @@ const menuGroups = [
     name: '安全规则',
     items: [
       { id: 'ssl-settings', name: 'SSL/HTTPS', full: 'CloudFlare HTTPS边缘证书批量设置', desc: '设置网址的HTTPS加密模式, TLS版本, 自动重定向到HTTPS等' },
+      { id: 'apply-cert', name: '证书申请', full: '一键申请免费SSL证书', desc: '使用 Let\'s Encrypt 申请免费SSL证书，支持通配符域名' },
       { id: 'copy-rules', name: '规则复制', full: 'CloudFlare 批量复制规则,WAF规则', desc: 'Configuration Rules, 转换规则, 重写URL, 修改请求头, 响应头, WAF自定义规则等' },
       { id: 'del-rules', name: '规则清除', full: 'CloudFlare 批量删除页面规则', desc: '批量清空各种规则, 转换规则, 重写URL, 修改请求/响应头, WAF自定义规则等' }
     ]
@@ -72,6 +75,12 @@ const menuGroups = [
       { id: 'cache-settings', name: '缓存管理', full: 'CloudFlare 批量清除缓存 缓存设置', desc: '清除域名缓存 设置缓存级别 Always Online等功能' },
       { id: 'optimization', name: '性能优化', full: 'CloudFlare 批量代码压缩网络优化', desc: '压缩HTML,JS,CSS代码, Brotli 压缩, 图像压缩, 资源预加载...' },
       { id: 'bulk-settings', name: '批量配置', full: 'CloudFlare 批量修改设置项', desc: 'CloudFlare在线批量修改网站设置项, Crawler Hints 等设置...' }
+    ]
+  },
+  {
+    name: '邮件管理',
+    items: [
+      { id: 'email-routing', name: '邮件路由', full: 'CloudFlare 邮件路由集成', desc: '开启邮件路由功能，并设置 Catch-all 规则转发至指定 Worker' }
     ]
   }
 ];
@@ -113,22 +122,22 @@ async function handleLogin(e) {
   e.preventDefault();
   const btn = e.target.querySelector('button[type="submit"]');
   const originalText = btn.innerHTML;
-  
+
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>登录中...';
-  
+
   try {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        username: e.target.username.value.trim(), 
-        password: e.target.password.value 
+      body: JSON.stringify({
+        username: e.target.username.value.trim(),
+        password: e.target.password.value
       })
     });
-    
+
     const data = await res.json();
-    
+
     if (res.ok) {
       localStorage.setItem('token', data.token);
       state.token = data.token;
@@ -136,15 +145,15 @@ async function handleLogin(e) {
       render();
     } else {
       let errorMsg = data.error || '登录失败';
-      
+
       if (data.remaining_attempts !== undefined) {
         errorMsg += `\n剩余尝试次数: ${data.remaining_attempts}`;
       }
-      
+
       if (data.locked_minutes !== undefined) {
         errorMsg = `账户已锁定，请 ${data.locked_minutes} 分钟后再试`;
       }
-      
+
       alert(errorMsg);
       e.target.password.value = '';
       e.target.password.focus();
@@ -189,7 +198,7 @@ function renderLogin() {
 
 function renderHeader() {
   const isInGroup = (groupItems) => groupItems.some(item => item.id === state.currentModule);
-  
+
   return `
     <header class="navbar navbar-expand-md navbar-light bg-white d-print-none sticky-top border-bottom py-2">
       <div class="container-xl">
@@ -253,6 +262,8 @@ function renderModuleContent() {
     ExportZonesModule.render(container, state);
   } else if (state.currentModule === 'ssl-settings') {
     SSLSettingsModule.render(container, state);
+  } else if (state.currentModule === 'apply-cert') {
+    ApplyCertModule.render(container, state);
   } else if (state.currentModule === 'copy-rules') {
     CopyRulesModule.render(container, state);
   } else if (state.currentModule === 'del-rules') {
@@ -263,6 +274,8 @@ function renderModuleContent() {
     OptimizationModule.render(container, state);
   } else if (state.currentModule === 'bulk-settings') {
     BulkSettingsModule.render(container, state);
+  } else if (state.currentModule === 'email-routing') {
+    EmailRoutingModule.render(container, state);
   } else {
     // Default module placeholder
     container.innerHTML = `
@@ -410,11 +423,11 @@ window.testExistingAccount = async (id, btn) => {
       body: JSON.stringify({ email: acc.email, key: acc.key })
     });
     const data = await res.json();
-    
+
     if (typeof AccountsModule !== 'undefined' && AccountsModule.accountStatuses) {
       AccountsModule.accountStatuses.set(id, data.success);
     }
-    
+
     if (data.success) {
       alert('✅ 连接成功！账户有效。');
       const statusCell = btn.closest('tr').querySelector('td:nth-child(5)');

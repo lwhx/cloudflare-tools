@@ -15,7 +15,11 @@ type Config struct {
 var GlobalConfig Config
 
 func LoadConfig() error {
-	data, err := os.ReadFile("config.yaml")
+	configPath := "config/config.yaml"
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		configPath = "config.yaml"
+	}
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return err
 	}

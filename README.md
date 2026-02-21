@@ -1,9 +1,6 @@
 # CloudFlare Tools
 
-<img width="192" height="54" alt="image" src="https://github.com/user-attachments/assets/9b112cbd-a7f2-4539-8c8a-23f3a4c593b8" />
-<img width="192" height="91" alt="image" src="https://github.com/user-attachments/assets/c597e2c0-ff8f-45b4-8edd-9bf1732f8db6" />
-<img width="192" height="91" alt="image" src="https://github.com/user-attachments/assets/3ae7f217-aa8c-4ae8-9256-d8ba623266b2" />
-
+一个功能强大的 CloudFlare 批量管理工具,支持域名、DNS、SSL、规则、缓存等多种批量操作。
 
 ## 功能特性
 
@@ -17,6 +14,7 @@
 
 ### 安全规则
 - **SSL/HTTPS 设置** - 批量配置 SSL 模式、TLS 版本、HTTPS 重定向
+- **证书申请** - 一键申请 Let's Encrypt 免费 SSL 证书，支持通配符域名
 - **批量复制规则** - 复制页面规则、防火墙规则、速率限制
 - **批量删除规则** - 清空各类规则配置
 
@@ -40,7 +38,27 @@
 
 ## 快速开始
 
-### 环境要求
+### 方式一：Docker 部署（推荐）
+
+1. 确保已安装 Docker 和 Docker Compose
+
+2. 配置管理员账号
+```bash
+cp Server/config.yaml.example Server/config.yaml
+# 编辑 config.yaml 设置管理员用户名和密码
+```
+
+3. 一键启动
+```bash
+chmod +x docker-start.sh
+./docker-start.sh
+```
+
+4. 访问 `http://localhost:28080`
+
+### 方式二：本地部署
+
+#### 环境要求
 
 - Go 1.19+
 - Node.js 16+
@@ -58,9 +76,16 @@ cd Cloudflare-Tools
 ```bash
 cp Server/config.yaml.example Server/config.yaml
 # 编辑 config.yaml 设置管理员用户名和密码
-
 ```
-3. 生产构建
+
+3. 安装 acme.sh（用于申请 SSL 证书）
+```bash
+chmod +x install-acme.sh
+./install-acme.sh
+source ~/.bashrc
+```
+
+4. 生产构建
 ```bash
 chmod +x build.sh
 ./build.sh
@@ -120,4 +145,3 @@ admin:
 ---
 
 ⭐ 如果这个项目对你有帮助,请给个 Star!
-# Cloudflare-Tools

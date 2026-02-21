@@ -10,6 +10,10 @@ import (
 )
 
 func ListAccounts(c *gin.Context) {
+	if models.Accounts == nil {
+		c.JSON(http.StatusOK, []models.Account{})
+		return
+	}
 	c.JSON(http.StatusOK, models.Accounts)
 }
 

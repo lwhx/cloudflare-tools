@@ -1,13 +1,17 @@
 #!/bin/bash
 
-# Cloudflare Tools 一键构建脚本
-
 PROJECT_NAME="cloudflare-tools"
 DIST_DIR="releases"
 
 build_frontend() {
     echo "==> 构建前端..."
     cd Frontend
+    
+    if [ ! -d "node_modules" ]; then
+        echo "==> 安装前端依赖..."
+        npm install
+    fi
+    
     npm run build
     rm -rf ../Server/dist
     cp -r dist ../Server/
@@ -24,7 +28,6 @@ build_backend() {
     cd Server
     GOOS=$os GOARCH=$arch go build -o "${binary_name}" main.go
     
-    # 确保有一个默认的 config.yaml 示例
     if [ ! -f "config.yaml" ]; then
         echo "admin: { username: 'admin', password: 'password' }" > config.yaml
     fi
